@@ -1,35 +1,46 @@
 package com.vcube.dao;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
+import com.vcube.model.Student;
+import com.vcube.utility.DBConnection;
 
-
-public class StudentDAO {
-
-	public static void main(String[] args) {
+public class StudentDAO implements StudentDAOInterface {
+Connection con = null;
+	@Override
+	public void insertStudent(Student s) {
 		try {
-			// 1.Driver loading/Register (database specific different syntax for different database)
-			Class.forName("com.mysql.cj.jdbc.Driver");
-
-			// 2. Establish Connection
-			Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/vcubesql", "root","root");
-			// 3. create statements
-			Statement st = con.createStatement();
-			// 4. Result
-			int n = st.executeUpdate("insert into student_jdbc values(2,'sai',100)");
-			if(n>0) {
-				System.out.println(n+" rows affected");
+			con = DBConnection.getConnection();
+			PreparedStatement ps = con.prepareStatement("insert into student_jdbc values(?,?,?)");
+			ps.setInt(1, s.getStdno());
+			ps.setString(2, s.getStdname());
+			ps.setInt(3, s.getMarks());
+			int n = ps.executeUpdate();
+			if (n > 0) {
+				System.out.println(n + " row(s) affected");
+			} else {
+				System.out.println("something went wrong...");
 			}
-			else {
-				System.out.println("Something went wrong...");
-			}
-			// 5.Connection close
-
 		} catch (Exception e) {
 			System.out.println(e);
 		}
+
+	}
+	@Override
+	public void getAllStudents() {
+		try {
+			con = DBConnection.getConnection();
+			PreparedStatement ps = con.prepareStatement("select * from student_jdbc");
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				System.out.println(rs.getInt(1)+":"+rs.getString(2)+":"+rs.getInt(3));
+			} 
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		
 	}
 
 }
